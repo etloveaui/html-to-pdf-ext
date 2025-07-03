@@ -1,0 +1,15 @@
+{
+  "name": "100x Daily Wrap → PDF",
+  "description": "100x Daily Wrap 템플릿을 고품질 PDF로 변환",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["debugger", "downloads", "tabs", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png", 
+      "128": "icon.png"
+    }
+  }
+}

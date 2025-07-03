@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>100x Daily Wrap → PDF</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="header">
+    <h3>📊 Smart PDF 변환기</h3>
+  </div>
+  
+  <div class="buttons">
+    <button id="smartSave" class="primary">🧠 자동 최적화</button>
+    <button id="quickSave" class="secondary">🚀 기본 변환</button>
+    <button id="customSave" class="tertiary">⚙️ 수동 조정</button>
+  </div>
+  
+  <div id="settings" class="hidden">
+    <div class="setting-group">
+      <label>배율 조정:
+        <select id="scale">
+          <option value="auto">자동 감지</option>
+          <option value="0.7">70% (매우 작게)</option>
+          <option value="0.8">80% (작게)</option>
+          <option value="0.9">90% (조금 작게)</option>
+          <option value="1.0" selected>100% (원본)</option>
+          <option value="1.1">110% (조금 크게)</option>
+        </select>
+      </label>
+      
+      <label>글꼴 크기:
+        <select id="fontSize">
+          <option value="10">10px (작게)</option>
+          <option value="11">11px (보통-)</option>
+          <option value="12" selected>12px (보통)</option>
+          <option value="13">13px (보통+)</option>
+          <option value="14">14px (크게)</option>
+        </select>
+      </label>
+      
+      <label>마진:
+        <select id="margin">
+          <option value="minimal">최소 (0.2cm)</option>
+          <option value="normal" selected>보통 (0.5cm)</option>
+          <option value="wide">넓게 (0.8cm)</option>
+        </select>
+      </label>
+    </div>
+    
+    <button id="saveWithSettings">PDF 저장</button>
+  </div>
+  
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
