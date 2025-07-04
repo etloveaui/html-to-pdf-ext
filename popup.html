@@ -2,12 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>100x Daily Wrap → PDF</title>
+  <title>FenoK HTML → PDF</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="header">
-    <h3>📊 Smart PDF 변환기</h3>
+    <h3>📊 HTML to PDF by Fenok</h3>
   </div>
   
   <div class="buttons">
@@ -20,12 +20,13 @@
     <div class="setting-group">
       <label>배율 조정:
         <select id="scale">
-          <option value="auto">자동 감지</option>
-          <option value="0.7">70% (매우 작게)</option>
-          <option value="0.8">80% (작게)</option>
+          <option value="auto">자동 (권장)</option>
+          <option value="0.7">70% (압축)</option>
+          <option value="0.8">80% (소형)</option>
           <option value="0.9">90% (조금 작게)</option>
-          <option value="1.0" selected>100% (원본)</option>
+          <option value="1.0" selected>100% (기본값)</option>
           <option value="1.1">110% (조금 크게)</option>
+          <option value="1.2">120% (최대)</option>
         </select>
       </label>
       
@@ -33,17 +34,18 @@
         <select id="fontSize">
           <option value="10">10px (작게)</option>
           <option value="11">11px (보통-)</option>
-          <option value="12" selected>12px (보통)</option>
+          <option value="12" selected>12px (기본값)</option>
           <option value="13">13px (보통+)</option>
           <option value="14">14px (크게)</option>
+          <option value="16">16px (최대)</option>
         </select>
       </label>
       
-      <label>마진:
+      <label>페이지 여백:
         <select id="margin">
           <option value="minimal">최소 (0.2cm)</option>
-          <option value="normal" selected>보통 (0.5cm)</option>
-          <option value="wide">넓게 (0.8cm)</option>
+          <option value="normal" selected>기본 (0.5cm)</option>
+          <option value="wide">넓게 (1.0cm)</option>
         </select>
       </label>
     </div>
