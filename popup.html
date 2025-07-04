@@ -9,50 +9,54 @@
   <div class="header">
     <h3>📊 HTML to PDF by Fenok</h3>
   </div>
-  
+
   <div class="buttons">
     <button id="smartSave" class="primary">🧠 자동 최적화</button>
     <button id="quickSave" class="secondary">🚀 기본 변환</button>
     <button id="customSave" class="tertiary">⚙️ 수동 조정</button>
   </div>
-  
+
   <div id="settings" class="hidden">
     <div class="setting-group">
-      <label>배율 조정:
+      <label>배율 조정 (Scale):
         <select id="scale">
           <option value="auto">자동 (권장)</option>
+          <option value="0.5">50% (전체 요약)</option>
           <option value="0.7">70% (압축)</option>
           <option value="0.8">80% (소형)</option>
           <option value="0.9">90% (조금 작게)</option>
           <option value="1.0" selected>100% (기본값)</option>
           <option value="1.1">110% (조금 크게)</option>
-          <option value="1.2">120% (최대)</option>
+          <option value="1.2">120% (확대)</option>
+          <option value="1.5">150% (최대 확대)</option>
         </select>
       </label>
-      
-      <label>글꼴 크기:
+
+      <label>글꼴 크기 (Font Size):
         <select id="fontSize">
+          <option value="8">8px (최소)</option>
           <option value="10">10px (작게)</option>
           <option value="11">11px (보통-)</option>
           <option value="12" selected>12px (기본값)</option>
-          <option value="13">13px (보통+)</option>
           <option value="14">14px (크게)</option>
-          <option value="16">16px (최대)</option>
+          <option value="16">16px (더 크게)</option>
+          <option value="20">20px (최대)</option>
         </select>
       </label>
-      
-      <label>페이지 여백:
+
+      <label>페이지 여백 (Margin):
         <select id="margin">
           <option value="minimal">최소 (0.2cm)</option>
           <option value="normal" selected>기본 (0.5cm)</option>
           <option value="wide">넓게 (1.0cm)</option>
+          <option value="extra-wide">아주 넓게 (2.0cm)</option>
         </select>
       </label>
     </div>
-    
+
     <button id="saveWithSettings">PDF 저장</button>
   </div>
-  
+
   <div id="status"></div>
   <script src="popup.js"></script>
 </body>

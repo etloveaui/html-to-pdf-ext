@@ -23,9 +23,11 @@ const SMART_OPTIMIZER = {
     const fontSize = customFont ? `${customFont}px` : preset.fontSize;
     
     const margins = {
-      'minimal': { top: 0.2, bottom: 0.2, left: 0.3, right: 0.3 },
+      'zero':   { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+      'minimal':{ top: 0.2, bottom: 0.2, left: 0.3, right: 0.3 },
       'normal': { top: 0.4, bottom: 0.4, left: 0.5, right: 0.5 },
-      'wide': { top: 0.6, bottom: 0.6, left: 0.8, right: 0.8 }
+      'wide':   { top: 0.6, bottom: 0.6, left: 0.8, right: 0.8 },
+      'extra-wide': { top: 2.0, bottom: 2.0, left: 2.0, right: 2.0 }
     };
     const margin = margins[customMargin || 'normal'];
 
@@ -80,18 +82,15 @@ async function convertToPDF(settings, mode, tab, pageContent) {
     
     await chrome.debugger.attach(target, '1.3');
 
-    // 🎯 새로운 접근: DOM 크기를 직접 변경하여 배율 적용
     const scaleValue = settings.scale;
     const fontSize = settings.fontSize;
     
     await chrome.debugger.sendCommand(target, 'Runtime.evaluate', {
       expression: `
         (function() {
-          // 기존 스타일 초기화
           const existingStyle = document.getElementById('pdf-scale-optimizer');
           if (existingStyle) existingStyle.remove();
           
-          // 새로운 스케일링 스타일 생성
           const style = document.createElement('style');
           style.id = 'pdf-scale-optimizer';
           style.innerHTML = \`
@@ -100,6 +99,40 @@ async function convertToPDF(settings, mode, tab, pageContent) {
                 size: A4;
                 margin: ${settings.margin.top}cm ${settings.margin.right}cm ${settings.margin.bottom}cm ${settings.margin.left}cm;
               }
+
+              /* --- 페이지 나눔 및 공백 최적화 --- */
+              body, div, section, article, header, footer {
+                break-before: auto !important;
+                break-after: auto !important;
+              }
+              h1, h2, h3, h4, h5, h6, figure, img, table, ul, ol, li {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+              }
+              p, blockquote {
+                widows: 3 !important;
+                orphans: 3 !important;
+              }
+              h1, h2, h3 {
+                 page-break-before: auto !important;
+                 break-before: auto !important;
+              }
+
+              /* --- 레이아웃 깨짐(겹침) 방지용 특수 코드 --- */
+              /* ⚠️ 중요: 아래 클래스 이름(.multi-column-container 등)은 예시입니다. */
+              /* F12 개발자 도구로 실제 페이지의 클래스 이름을 찾아서 수정해야 합니다. */
+              .multi-column-container, .dashboard-item {
+                  display: block !important;
+                  width: 100% !important;
+              }
+              .multi-column-container > div, .dashboard-item > div {
+                  display: block !important;
+                  width: auto !important;
+                  position: static !important;
+                  float: none !important;
+              }
+              
+              /* --- 핵심 스케일링 로직 --- */
               html {
                 transform: scale(${scaleValue}) !important;
                 transform-origin: 0 0 !important;
@@ -115,14 +148,6 @@ async function convertToPDF(settings, mode, tab, pageContent) {
               * {
                 box-sizing: border-box !important;
               }
-              table {
-                font-size: ${parseInt(fontSize) - 1}px !important;
-                border-collapse: collapse !important;
-              }
-              h1, h2, h3 {
-                font-size: ${parseInt(fontSize) + 2}px !important;
-                margin: 8px 0 !important;
-              }
             }
           \`;
           document.head.appendChild(style);
@@ -132,15 +157,13 @@ async function convertToPDF(settings, mode, tab, pageContent) {
       `
     });
 
-    // 잠시 대기 (DOM 변경사항 적용 시간)
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // PDF 생성 (API 파라미터는 최소한으로)
     const {data} = await chrome.debugger.sendCommand(target, 'Page.printToPDF', {
       printBackground: true,
-      paperWidth: 8.27,  // A4
+      paperWidth: 8.27,
       paperHeight: 11.7,
-      preferCSSPageSize: false  // 중요: CSS 우선순위 비활성화
+      preferCSSPageSize: false
     });
 
     const byteArray = Uint8Array.from(atob(data), c => c.charCodeAt(0));
@@ -174,7 +197,6 @@ async function convertToPDFWithViewport(settings, mode, tab, pageContent) {
     
     await chrome.debugger.attach(target, '1.3');
 
-    // viewport 크기 강제 조정
     const scaleValue = settings.scale;
     const baseWidth = 1024;
     const baseHeight = 768;
@@ -188,13 +210,10 @@ async function convertToPDFWithViewport(settings, mode, tab, pageContent) {
       mobile: false
     });
 
-    // 페이지 새로고침하여 새 viewport 적용
     await chrome.debugger.sendCommand(target, 'Page.reload');
     
-    // 로딩 완료 대기
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // PDF 생성
     const {data} = await chrome.debugger.sendCommand(target, 'Page.printToPDF', {
       printBackground: true,
       marginTop: settings.margin.top,
@@ -220,7 +239,6 @@ async function convertToPDFWithViewport(settings, mode, tab, pageContent) {
     status.textContent = `❌ 실패: ${err.message}`;
   } finally {
     try { 
-      // viewport 원복
       await chrome.debugger.sendCommand(target, 'Emulation.clearDeviceMetricsOverride');
       await chrome.debugger.detach(target); 
     } catch {}
@@ -232,7 +250,7 @@ document.getElementById('smartSave').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const pageContent = await getPageContent(tab);
   const contentType = SMART_OPTIMIZER.detectContentType(pageContent, tab.title);
-  const settings = SMART_OPTIMIZER.getScaleSettings(contentType, 'auto');
+  const settings = SMART_OPTIMIZER.getScaleSettings(contentType, 'auto', null, 'normal');
   
   try {
     await convertToPDF(settings, 'smart', tab, pageContent);
@@ -246,7 +264,7 @@ document.getElementById('smartSave').addEventListener('click', async () => {
 document.getElementById('quickSave').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const pageContent = await getPageContent(tab);
-  const settings = SMART_OPTIMIZER.getScaleSettings('daily-wrap-standard', 'auto');
+  const settings = SMART_OPTIMIZER.getScaleSettings('generic', '1.0', '12', 'normal');
   
   try {
     await convertToPDF(settings, 'quick', tab, pageContent);
